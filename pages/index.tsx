@@ -1,5 +1,7 @@
 import React from "react";
 import { GetStaticProps } from "next";
+import { useUser } from "@auth0/nextjs-auth0";
+
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
@@ -21,10 +23,21 @@ type Props = {
 };
 
 const Blog: React.FC<Props> = (props) => {
+  const { user, error, isLoading } = useUser();
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>{error.message}</div>;
+
   return (
     <Layout>
       <div className="page">
         <h1>Public Feed</h1>
+        {user ? (
+          <h2>
+            Welcome {user.name}! <a href="/api/auth/logout">Logout</a>
+          </h2>
+        ) : (
+          <a href="/api/auth/login">Login</a>
+        )}
         <main>
           {props.feed.map((post) => (
             <div key={post.id} className="post">
